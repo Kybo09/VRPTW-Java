@@ -1,5 +1,6 @@
 package Algo;
 
+import RoadMap.Client;
 import RoadMap.Road;
 import RoadMap.Roadmap;
 
@@ -14,22 +15,37 @@ public class RandomAlgo {
 
     public void calculRoads(){
         int clientNotVisited = this.roadmap.getClients().size() - this.roadmap.clientsVisited;
-        while(clientNotVisited > 1){
-            Random random = new Random();
-            System.out.println("Clients not visited : " + clientNotVisited);
-            int numberOfClients = random.nextInt(clientNotVisited - 1) + 1;
+        while(clientNotVisited > 0 ){
+            Random rand = new Random();
+            int numberOfClients = rand.nextInt(clientNotVisited) + 1;
             Road road = new Road(this.roadmap.getDepot());
-            for(int i = 0; i < numberOfClients; i++){
-                int clientIndex = random.nextInt(this.roadmap.getClients().size());
-                while(this.roadmap.visited.get(this.roadmap.getClients().get(clientIndex))){
-                    clientIndex = random.nextInt(this.roadmap.getClients().size());
+            double distance = 0;
+            double capacity = 0;
+            for(int i= 0; i< numberOfClients; i++){
+                int randomClient = rand.nextInt(this.roadmap.getClients().size());
+                while(this.roadmap.visited.get(this.roadmap.getClients().get(randomClient))){
+                    randomClient = rand.nextInt(this.roadmap.getClients().size());
                 }
-                road.addClient(this.roadmap.getClients().get(clientIndex));
-                this.roadmap.visited.put(this.roadmap.getClients().get(clientIndex), true);
-                this.roadmap.clientsVisited++;
+                Client client = this.roadmap.getClients().get(randomClient);
+                if(i == 0){
+                    distance += this.roadmap.getDistanceBetweenCoords(this.roadmap.getDepot().getX(), this.roadmap.getDepot().getY(), client.getX(), client.getY());
+                }
+                else{
+                    distance += this.roadmap.getDistanceBetweenCoords(road.getLastClient().getX(), road.getLastClient().getY(), client.getX(), client.getY());
+                }
+                double distanceToDepot = this.roadmap.getDistanceBetweenCoords(client.getX(), client.getY(), this.roadmap.getDepot().getX(), this.roadmap.getDepot().getY());
+                capacity += client.getDemand();
+                if(capacity <= this.roadmap.getMaxQuantity() && distance <= this.roadmap.getDepot().getDueTime() - distanceToDepot){
+                    road.addClient(client);
+                    this.roadmap.visited.put(client, true);
+                    clientNotVisited--;
+                }
+                else{
+                    break;
+                }
+
             }
             this.roadmap.addRoad(road);
-            clientNotVisited = this.roadmap.getClients().size() - this.roadmap.clientsVisited;
         }
     }
 

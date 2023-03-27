@@ -3,27 +3,28 @@ import RoadMap.Depot;
 import RoadMap.Road;
 import RoadMap.Roadmap;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) {
-        Roadmap roadmap = new Roadmap();
-        Client client1 = new Client("C1", 1, 1, 1, 1, 1, 1);
-        Client client2 = new Client("C2", 2, 2, 2, 2, 2, 2);
-        Client client3 = new Client("C3", 3, 3, 3, 3, 3, 3);
-        Depot depot = new Depot("D1", 1, 1, 1, 1);
-        Road road = new Road(depot);
-        road.addClient(client1);
-        road.addClient(client2);
-        road.addClient(client3);
-        roadmap.addRoad(road);
-        roadmap.printRoadmap();
-        try {
-            roadmap.fillRoadmap("data101.vrp");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public static void main(String[] args) throws IOException {
+        int quantity = 0;
+        File file = new File("src\\Datasets\\data1202.vrp");
+        BufferedReader br = null;
+        br = new BufferedReader(new FileReader(file));
+        String st;
+        int i = 0;
+        while ((st = br.readLine()) != null) {
+            if(st.contains("DATA_CLIENTS")){
+                st = br.readLine();
+                while(st != null){
+                    String[] clientData = st.split(" ");
+                    quantity += Integer.parseInt(clientData[5]);
+                    st = br.readLine();
+                }
+            }
         }
+        System.out.println(quantity);
     }
 
 }

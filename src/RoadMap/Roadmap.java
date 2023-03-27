@@ -74,7 +74,23 @@ public class Roadmap {
         }
     }
 
+    public double getDistanceBetweenCoords(int x1, int y1, int x2, int y2){
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
     public ArrayList<Client> getClients() {
         return clients;
+    }
+
+    public double getDistance() {
+        double distance = 0;
+        for (Road road : this.roads) {
+            distance += road.calcDistance();
+        }
+        return distance;
+    }
+
+    public int getMaxQuantity() {
+        return maxQuantity;
     }
 }

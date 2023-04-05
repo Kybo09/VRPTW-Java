@@ -1,9 +1,8 @@
+import Algo.GenerationManager;
 import Algo.RandomAlgo;
-import RoadMap.Client;
-import RoadMap.Depot;
-import RoadMap.Road;
-import RoadMap.Roadmap;
+import RoadMap.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -30,9 +29,10 @@ public class GUIRoadmap extends Application {
 
     private static Map<String, Label> labels = new HashMap<>();
     private static int roadNumberVisible = -1;
-    private static Roadmap roadmap = new Roadmap();
+    public static Roadmap roadmap = new Roadmap();
     private static double ratio;
     private static int window_size = 900;
+    private static GenerationManager gm = new GenerationManager();
     public static void createRoadmap(){
         try {
             roadmap.fillRoadmap("data101.vrp");
@@ -41,6 +41,11 @@ public class GUIRoadmap extends Application {
         }
 
         clients = roadmap.getClients();
+        double maxX = clients.stream().mapToDouble(Client::getX).max().orElse(0);
+        double maxY = clients.stream().mapToDouble(Client::getY).max().orElse(0);
+        double ratioX = maxX > 0 ? (window_size-50) / maxX : 1;
+        double ratioY = maxY > 0 ? (window_size-50) / maxY : 1;
+        ratio = Math.min(ratioX, ratioY);
     }
 
 
@@ -63,12 +68,12 @@ public class GUIRoadmap extends Application {
         pane.getChildren().addAll(circles.values());
         //pane.getChildren().addAll(labels.values());
 
-        ArrayList<Map<String, String>> roadsLinks = roadmap.getRoadsLinks();
+        ArrayList<Map<Node, Node>> roadsLinks = roadmap.getRoadsLinks();
         int roadNumber = 1;
-        for (Map<String, String> road : roadsLinks) {
+        for (Map<Node, Node> road : roadsLinks) {
             if(roadNumberVisible == -1 || (roadNumberVisible != -1 && roadNumberVisible == roadNumber)){
-                for (Map.Entry<String, String> entry : road.entrySet()) {
-                    Line line = createLine(entry.getKey(), entry.getValue(), roadNumber);
+                for (Map.Entry<Node, Node> entry : road.entrySet()) {
+                    Line line = createLine(entry.getKey().getIdName(), entry.getValue().getIdName(), roadNumber);
                     pane.getChildren().add(line);
                 }
             }
@@ -84,8 +89,12 @@ public class GUIRoadmap extends Application {
         hBox.setPadding(new Insets(10, 20, 10, 20));
         hBox.setStyle("-fx-background-color: #19191a;");
 
-        Label infoLabel = new Label("Nombre de routes : " + roadmap.getRoads().size());
+        Label infoLabel = new Label("Génération n° " + gm.getGenerationNumber());
         infoLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
+        infoLabel.setOnMouseClicked(e -> {
+            nextGeneration();
+            start(stage);
+        });
         hBox.getChildren().add(infoLabel);
 
         for(Road r : roadmap.getRoads()){
@@ -120,8 +129,11 @@ public class GUIRoadmap extends Application {
 
         // Configurer la fenêtre principale avec la scène
         stage.setScene(scene);
+        stage.setTitle("Roadmap");
         stage.show();
     }
+
+
 
     private static void setRoadVisible(int id){
         if(roadNumberVisible == id){
@@ -156,17 +168,34 @@ public class GUIRoadmap extends Application {
     }
 
 
-
     public static void main(String[] args) {
+        // On crée la première roadmap aléatoirement
         createRoadmap();
-        double maxX = clients.stream().mapToDouble(Client::getX).max().orElse(0);
-        double maxY = clients.stream().mapToDouble(Client::getY).max().orElse(0);
-        double ratioX = maxX > 0 ? (window_size-50) / maxX : 1;
-        double ratioY = maxY > 0 ? (window_size-50) / maxY : 1;
-        ratio = Math.min(ratioX, ratioY);
         RandomAlgo ra = new RandomAlgo(roadmap);
         ra.calculRoads();
         roadmap = ra.getRoadmap();
+
+        // On initialise notre Manager de génération
+        gm.setRoadmap(roadmap);
+        /*ArrayList<Roadmap> roadmaps = gm.getReverseNeighbours();
+
+        System.out.println("Distance : " + roadmap.getDistance());
+        System.out.println("Nombre de voisins : " + roadmaps.size());
+        for(Roadmap r : roadmaps){
+            System.out.println(r.getDistance());
+        }*/
+
+
         launch();
     }
+
+    private static void nextGeneration() {
+        System.out.println("Génération en cours...");
+        for(int i = 0; i < 100; i++){
+            roadmap = gm.getNextGenRoadmap();
+            gm.setRoadmap(roadmap);
+        }
+        System.out.println("Génération terminée");
+    }
+
 }

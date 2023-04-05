@@ -4,14 +4,13 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-public class Roadmap {
+public class Roadmap implements Cloneable {
     private ArrayList<Road> roads = new ArrayList<Road>();
     private ArrayList<Client> clients = new ArrayList<Client>();
     public HashMap<Client, Boolean> visited = new HashMap<Client, Boolean>();
-
-    public int clientsVisited = 0;
     private Depot depot;
     private int maxQuantity;
     public Roadmap(){}
@@ -37,16 +36,16 @@ public class Roadmap {
         return roads;
     }
 
-    public ArrayList<Map<String, String>> getRoadsLinks() {
-        ArrayList<Map<String, String>> roadsLinks = new ArrayList<>();
+    public ArrayList<Map<Node, Node>> getRoadsLinks() {
+        ArrayList<Map<Node, Node>> roadsLinks = new ArrayList<>();
         for (Road road : this.roads) {
-            roadsLinks.add(road.getClients());
+            roadsLinks.add(road.getEdges());
         }
         return roadsLinks;
     }
 
+
     public void fillRoadmap(String filename) throws IOException {
-        System.out.println("Création du modèle...");
         File file = new File("src\\Datasets\\" + filename);
         BufferedReader br = null;
         br = new BufferedReader(new FileReader(file));
@@ -93,4 +92,46 @@ public class Roadmap {
     public int getMaxQuantity() {
         return maxQuantity;
     }
+
+    public boolean isRoadmapValid(){
+        int nbClientsVisited = 0;
+        for (Road road : this.roads) {
+            for(Node node : road.getNodesList()){
+                if(node instanceof Client){
+                    nbClientsVisited++;
+                }
+            }
+            if(road.calcDistance() > this.depot.getDueTime()){
+                return false;
+            }
+            if(road.calcQuantity() > this.maxQuantity){
+                return false;
+            }
+            if(road.getNodesList().getFirst() instanceof Client || road.getNodesList().getLast() instanceof Client){
+                return false;
+            }
+        }
+        if(nbClientsVisited != this.clients.size()){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Roadmap clone() {
+        Roadmap clone = new Roadmap();
+        clone.roads = new ArrayList<Road>();
+        for(Road r : this.roads){
+            clone.roads.add(r.clone());
+        }
+        clone.clients = new ArrayList<Client>(this.clients);
+        clone.visited = new HashMap<Client, Boolean>();
+        for(Client c : this.clients){
+            clone.visited.put(c, false);
+        }
+        clone.depot = this.depot;
+        clone.maxQuantity = this.maxQuantity;
+        return clone;
+    }
+
 }

@@ -7,50 +7,45 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class Road {
+public class Road implements Cloneable {
     private int id;
     private static int idCounter = 1;
     private Depot depot;
-    private LinkedList<Client> clients = new LinkedList<>();
-
+    private LinkedList<Node> nodes = new LinkedList<>();
 
     public Road(Depot depot) {
         this.id = idCounter;
         idCounter++;
         this.depot = depot;
     }
-    public void addClient(Client client) {
-        this.clients.add(client);
-    }
 
     public void printRoad(){
         System.out.println("Road " + this.id + " :");
-        System.out.printf("%s --> ", this.depot.getIdName());
-        for (Client client : this.clients) {
-            System.out.printf("%s --> ", client.getIdName());
+        for (int i = 0; i< nodes.size(); i++){
+            if(i == nodes.size()-1){
+                System.out.printf("%s", nodes.get(i).getIdName());
+                continue;
+            }
+            System.out.printf("%s --> ", nodes.get(i).getIdName());
         }
-        System.out.printf("%s", this.depot.getIdName());
     }
 
-    public Map<String, String> getClients() {
-        Map<String, String> clientMap = new HashMap<>();
-
-        clientMap.put(depot.getIdName(), clients.getFirst().getIdName());
-        for(int i = 0; i < clients.size() - 1; i++) {
-            clientMap.put(clients.get(i).getIdName(), clients.get(i + 1).getIdName());
+    public HashMap<Node, Node> getEdges() {
+        HashMap<Node, Node> nodeMap = new HashMap<>();
+        int i = 0;
+        for(i = 0; i < nodes.size() - 1; i++) {
+            nodeMap.put(nodes.get(i), nodes.get(i + 1));
         }
-        clientMap.put(clients.getLast().getIdName(), depot.getIdName());
+        nodeMap.put(nodes.get(i-1), nodes.getLast());
 
-        return clientMap;
+        return nodeMap;
     }
 
     public double calcDistance(){
         double distance = 0;
-        distance += getDistanceBetweenCoords(depot.getX(), depot.getY(), clients.getFirst().getX(), clients.getFirst().getY());
-        for(int i = 0; i < clients.size() - 1; i++) {
-            distance += getDistanceBetweenCoords(clients.get(i).getX(), clients.get(i).getY(), clients.get(i + 1).getX(), clients.get(i + 1).getY());
+        for(int i = 0; i < nodes.size() - 1; i++) {
+            distance += getDistanceBetweenCoords(nodes.get(i).getX(), nodes.get(i).getY(), nodes.get(i + 1).getX(), nodes.get(i + 1).getY());
         }
-        distance += getDistanceBetweenCoords(clients.getLast().getX(), clients.getLast().getY(), depot.getX(), depot.getY());
         return distance;
     }
 
@@ -62,7 +57,42 @@ public class Road {
         return id;
     }
 
-    public Client getLastClient() {
-        return this.clients.getLast();
+    public Node getLastNode() {
+        return this.nodes.getLast();
+    }
+
+    public int calcQuantity() {
+        int quantity = 0;
+        for (Node node : this.nodes) {
+            if(node instanceof Client)
+                quantity += ((Client) node).getDemand();
+        }
+        return quantity;
+    }
+
+    public LinkedList<Node> getNodesList() {
+        return this.nodes;
+    }
+
+    public void setNodesList(LinkedList<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    @Override
+    public Road clone() {
+        try {
+            Road clone = (Road) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
+    public void addNode(Node node) {
+        this.nodes.add(node);
+    }
+
+    public void removeNode(Node node) {
+        this.nodes.remove(node);
     }
 }

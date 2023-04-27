@@ -21,74 +21,43 @@ public class Main {
         nodes.add(c1);
         nodes.add(c2);
         nodes.add(c3);
+        nodes.add(c4);
         nodes.add(depot);
 
-        Map<Node, Node> nodeMap = new HashMap<>();
-        nodeMap.put(depot, c1);
-        nodeMap.put(c1, c2);
-        nodeMap.put(c2, c3);
-        nodeMap.put(c3, depot);
+        Road road = new Road(depot);
+        road.setNodesList(nodes);
 
-        relocate(nodes, nodeMap);
+        Roadmap roadmap = new Roadmap();
+        roadmap.addRoad(road);
+
+
+        twoopt(roadmap);
     }
 
 
-    public static List<LinkedList<Node>> relocate(LinkedList<Node> nodes, Map<Node, Node> nodeMap){
-        List<LinkedList<Node>> allNewClients = new ArrayList<>();
-        // Pour chaque point on teste les différentes combinaisons
-        for(int i=0; i<nodes.size()-1; i++){
-            if(i != 0){
-                ArrayList<Integer> indexToInsert = new ArrayList<>();
-                for(int j=0; j<nodes.size(); j++){
-                    if(j != i && j != i-1 && j != i+1 && j != 0){
-                        indexToInsert.add(j);
-                    }
-                }
-                for(int k=0; k<indexToInsert.size(); k++){
+
+    public static void twoopt(Roadmap roadmap){
+        ArrayList<Roadmap> neighbours = new ArrayList<Roadmap>();
+        for(Road road : roadmap.getRoads()){
+            LinkedList<Node> nodes = road.getNodesList();
+            // Pour chaque paire de points on teste l'échange
+            for(int i=1; i<nodes.size()-2; i++){
+                for(int j=i+1; j<nodes.size()-1; j++){
                     LinkedList<Node> newClients = new LinkedList<>();
-                    for(int l=0; l<nodes.size(); l++){
-                        if(l == i){
-                            continue;
-                        }
-                        if(l == indexToInsert.get(k)){
-                            newClients.add(nodes.get(i));
-                        }
-                        newClients.add(nodes.get(l));
+                    // On inverse la séquence des points entre i et j
+                    for(int k=0; k<i; k++){
+                        newClients.add(nodes.get(k));
                     }
-                    allNewClients.add(newClients);
-                }
-            }
-        }
-        return allNewClients;
-    }
-
-    public static void twoopt(LinkedList<Node> nodes, Map<Node, Node> nodeMap){
-        List<LinkedList<Client>> allNewClients = new ArrayList<>();
-        Map<Node,Node> edgesToSwap = new HashMap<>();
-        ArrayList<String> permutationsAlreadyUsed = new ArrayList<>();
-
-        for(Map.Entry<Node, Node> arreteToSwap : nodeMap.entrySet()) {
-            for(Map.Entry<Node, Node> arreteToSwapWith : nodeMap.entrySet()) {
-                if(arreteToSwap.getKey().getIdName().equals(arreteToSwapWith.getKey().getIdName()) || arreteToSwap.getKey().getIdName().equals(arreteToSwapWith.getValue().getIdName()) || arreteToSwap.getValue().getIdName().equals(arreteToSwapWith.getKey().getIdName()) || arreteToSwap.getValue().getIdName().equals(arreteToSwapWith.getValue().getIdName())) {
-                    // Si arrête adjacente, on passe à la suivante
-                    continue;
-                }
-                String permut = arreteToSwap.getKey().getIdName() + arreteToSwap.getValue().getIdName() + arreteToSwapWith.getKey().getIdName() + arreteToSwapWith.getValue().getIdName();
-                String oppositePermut = arreteToSwapWith.getKey().getIdName() + arreteToSwapWith.getValue().getIdName() + arreteToSwap.getKey().getIdName() + arreteToSwap.getValue().getIdName();
-                // On ajoute les permutations
-
-                if(permutationsAlreadyUsed.contains(oppositePermut)) {
-                    // Si la permutation a déjà été utilisée, on passe à la suivante
-                    continue;
-                }
-                permutationsAlreadyUsed.add(permut);
-
-
-                System.out.println(arreteToSwap.getKey().getIdName() + " " + arreteToSwap.getValue().getIdName() + " " + arreteToSwapWith.getKey().getIdName() + " " + arreteToSwapWith.getValue().getIdName());
-                // On supprime les permutations en double
-                LinkedList<Node> newNodes = new LinkedList<>(nodes);
-                for(int i = 0; i < nodes.size(); i++) {
-
+                    for(int k=j; k>=i; k--){
+                        newClients.add(nodes.get(k));
+                    }
+                    for(int k=j+1; k<nodes.size(); k++){
+                        newClients.add(nodes.get(k));
+                    }
+                    System.out.println();
+                    for(Node n : newClients){
+                        System.out.print(n.getIdName());
+                    }
                 }
             }
         }

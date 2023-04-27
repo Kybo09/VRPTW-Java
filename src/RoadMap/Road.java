@@ -19,6 +19,14 @@ public class Road implements Cloneable {
         this.depot = depot;
     }
 
+    public Depot getDepot() {
+        return depot;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void printRoad(){
         System.out.println("Road " + this.id + " :");
         for (int i = 0; i< nodes.size(); i++){

@@ -1,26 +1,17 @@
-import Algo.GenerationManager;
+import Algo.HillClimbing;
 import Algo.RandomAlgo;
 import RoadMap.*;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
+import javafx.scene.shape.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class GUIRoadmap extends Application {
@@ -32,7 +23,6 @@ public class GUIRoadmap extends Application {
     public static Roadmap roadmap = new Roadmap();
     private static double ratio;
     private static int window_size = 900;
-    private static GenerationManager gm = new GenerationManager();
     public static void createRoadmap(){
         try {
             roadmap.fillRoadmap("data101.vrp");
@@ -89,8 +79,13 @@ public class GUIRoadmap extends Application {
         hBox.setPadding(new Insets(10, 20, 10, 20));
         hBox.setStyle("-fx-background-color: #19191a;");
 
-        Label infoLabel = new Label("Génération n° " + gm.getGenerationNumber());
-        infoLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
+        Label infoLabel2 = new Label("Distance Totale : " + Math.round(roadmap.getDistance()));
+        infoLabel2.setStyle("-fx-font-size: 25px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
+        hBox.getChildren().add(infoLabel2);
+
+        Label infoLabel = new Label("Run Next Generation");
+        infoLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: black; -fx-font-weight: bold; -fx-alignment: center;");
+        infoLabel.setBackground(new Background(new BackgroundFill(Color.web("#bababa"), CornerRadii.EMPTY, Insets.EMPTY)));
         infoLabel.setOnMouseClicked(e -> {
             nextGeneration();
             start(stage);
@@ -113,9 +108,7 @@ public class GUIRoadmap extends Application {
         Label tes = new Label("");
         hBox.getChildren().add(tes);
 
-        Label infoLabel2 = new Label("Distance Totale : " + Math.round(roadmap.getDistance()));
-        infoLabel2.setStyle("-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
-        hBox.getChildren().add(infoLabel2);
+
 
         // Placer le VBox à l'ouest et le HBox à l'est
         BorderPane borderPane = new BorderPane();
@@ -148,13 +141,17 @@ public class GUIRoadmap extends Application {
         Circle startCircle = circles.get(start);
         Circle endCircle = circles.get(end);
 
+        double slope = (startCircle.getCenterY() - endCircle.getCenterY()) / (startCircle.getCenterX() - endCircle.getCenterX());
+        double lineAngle = Math.atan(slope);
+
+        double arrowAngle = startCircle.getCenterX() > endCircle.getCenterX() ? Math.toRadians(45) : -Math.toRadians(225);
+
         startCircle.setFill(getColor(roadNumber));
         endCircle.setFill(getColor(roadNumber));
 
         // Créer la ligne reliant les deux cercles
         Line line = new Line(startCircle.getCenterX(), startCircle.getCenterY(),
                 endCircle.getCenterX(), endCircle.getCenterY());
-
 
         // changer la couleur de la ligne
         line.setStroke(getColor(roadNumber));
@@ -168,6 +165,7 @@ public class GUIRoadmap extends Application {
     }
 
 
+
     public static void main(String[] args) {
         // On crée la première roadmap aléatoirement
         createRoadmap();
@@ -175,27 +173,20 @@ public class GUIRoadmap extends Application {
         ra.calculRoads();
         roadmap = ra.getRoadmap();
 
-        // On initialise notre Manager de génération
-        gm.setRoadmap(roadmap);
-        /*ArrayList<Roadmap> roadmaps = gm.getReverseNeighbours();
-
-        System.out.println("Distance : " + roadmap.getDistance());
-        System.out.println("Nombre de voisins : " + roadmaps.size());
-        for(Roadmap r : roadmaps){
-            System.out.println(r.getDistance());
-        }*/
-
-
         launch();
     }
 
     private static void nextGeneration() {
         System.out.println("Génération en cours...");
-        for(int i = 0; i < 100; i++){
-            roadmap = gm.getNextGenRoadmap();
-            gm.setRoadmap(roadmap);
-        }
-        System.out.println("Génération terminée");
+        long startTime = System.currentTimeMillis();
+        HillClimbing hc = new HillClimbing(roadmap);
+        roadmap = hc.run();
+
+//        SimulatedAnnealing sa = new SimulatedAnnealing(roadmap);
+//        roadmap = sa.run();
+        long endTime = System.currentTimeMillis();
+        System.out.println("Génération terminée, distance totale : " + roadmap.getDistance());
+        System.out.println("Temps d'exécution : " + (endTime - startTime)/1000 + "s");
     }
 
 }

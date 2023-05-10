@@ -4,6 +4,8 @@ public class Client extends Node implements Cloneable{
     private int demand;
     private int service;
 
+    public int roadNumber;
+
     public Client(String idName, int x, int y, int readyTime, int dueTime, int demand, int service) {
         super(idName, x, y, readyTime, dueTime);
         this.demand = demand;

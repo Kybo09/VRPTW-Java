@@ -96,9 +96,23 @@ public class Roadmap implements Cloneable {
     public boolean isRoadmapValid(){
         int nbClientsVisited = 0;
         for (Road road : this.roads) {
-            for(Node node : road.getNodesList()){
-                if(node instanceof Client){
+            int distance = 0;
+
+            for(int i = 0; i < road.getNodesList().size() - 1; i++){
+                if(road.getNodesList().get(i) instanceof Client){
                     nbClientsVisited++;
+                }
+                distance += getDistanceBetweenCoords(road.getNodesList().get(i).getX(), road.getNodesList().get(i).getY(), road.getNodesList().get(i + 1).getX(), road.getNodesList().get(i + 1).getY());
+                if(i != road.getNodesList().size()-2){
+                    if(distance > road.getNodesList().get(i+1).getDueTime()){
+                        System.out.println(i + "/" + road.getNodesList().size() + " Distance = " + distance + "| Due time = " + road.getNodesList().get(i+1).getDueTime());
+                        return false;
+                    }
+                    Client client = (Client) road.getNodesList().get(i+1);
+                    if(distance < client.getReadyTime()){
+                        distance = client.getReadyTime();
+                    }
+                    distance += client.getService();
                 }
             }
             if(road.calcDistance() > this.depot.getDueTime()){

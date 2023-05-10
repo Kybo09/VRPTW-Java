@@ -18,6 +18,7 @@ public class HillClimbing {
         int i = 0;
         while(true){
             ArrayList<Roadmap> neighbors = nm.getAllNeighbours();
+            System.out.println("Nombre de voisins : " + neighbors.size());
             Roadmap bestNeighbor = neighbors.get(0);
             for (Roadmap r : neighbors) {
                 if (r.getDistance() < bestNeighbor.getDistance()) {

@@ -7,7 +7,6 @@ import java.util.Random;
 
 public class SimulatedAnnealing {
     private Roadmap currentRoadmap;
-    private double initialTemperature = 5000;
     private double coolingRate = 0.99;
     private NeighborManager nm = new NeighborManager();
     private int iterations = 1000;
@@ -19,9 +18,22 @@ public class SimulatedAnnealing {
     }
 
     public Roadmap run() {
-        double temperature = initialTemperature;
+        double temperature = 0;
         Roadmap bestRoadmap = currentRoadmap;
         double bestCost = currentRoadmap.getDistance();
+
+        double biggestDelta = 0;
+        ArrayList<Roadmap> neighborsForTemp = nm.getAllNeighbours();
+        for(Roadmap r : neighborsForTemp){
+            double delta = r.getDistance() - bestCost;
+            if(delta > biggestDelta){
+                biggestDelta = delta;
+            }
+        }
+
+        temperature = -biggestDelta / Math.log(0.8);
+
+        System.out.println("Temperature initiale : " + temperature);
 
         for (int i = 0; i < iterations; i++) {
             ArrayList<Roadmap> neighbors = nm.getAllNeighbours();

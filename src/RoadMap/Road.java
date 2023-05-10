@@ -53,6 +53,13 @@ public class Road implements Cloneable {
         double distance = 0;
         for(int i = 0; i < nodes.size() - 1; i++) {
             distance += getDistanceBetweenCoords(nodes.get(i).getX(), nodes.get(i).getY(), nodes.get(i + 1).getX(), nodes.get(i + 1).getY());
+            if(i != nodes.size()-2){
+                Client client = (Client) nodes.get(i+1);
+                if(distance < client.getReadyTime()){
+                    distance = client.getReadyTime();
+                }
+                distance += client.getService();
+            }
         }
         return distance;
     }
@@ -98,6 +105,8 @@ public class Road implements Cloneable {
 
     public void addNode(Node node) {
         this.nodes.add(node);
+        if(node instanceof Client)
+            ((Client) node).roadNumber = this.id;
     }
 
     public void removeNode(Node node) {

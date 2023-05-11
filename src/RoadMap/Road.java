@@ -36,6 +36,7 @@ public class Road implements Cloneable {
             }
             System.out.printf("%s --> ", nodes.get(i).getIdName());
         }
+        System.out.println();
     }
 
     public HashMap<Node, Node> getEdges() {
@@ -53,15 +54,20 @@ public class Road implements Cloneable {
         double distance = 0;
         for(int i = 0; i < nodes.size() - 1; i++) {
             distance += getDistanceBetweenCoords(nodes.get(i).getX(), nodes.get(i).getY(), nodes.get(i + 1).getX(), nodes.get(i + 1).getY());
-            if(i != nodes.size()-2){
-                Client client = (Client) nodes.get(i+1);
-                if(distance < client.getReadyTime()){
-                    distance = client.getReadyTime();
-                }
-                distance += client.getService();
-            }
         }
         return distance;
+    }
+
+    public double calcUniteTemps(){
+        double uniteTemps = 0;
+        for(int i = 0; i < nodes.size() - 1; i++) {
+            uniteTemps += getDistanceBetweenCoords(nodes.get(i).getX(), nodes.get(i).getY(), nodes.get(i + 1).getX(), nodes.get(i + 1).getY());
+            if(uniteTemps < nodes.get(i+1).getReadyTime()){
+                uniteTemps = nodes.get(i+1).getReadyTime();
+            }
+            uniteTemps += nodes.get(i+1).getService();
+        }
+        return uniteTemps;
     }
 
     private double getDistanceBetweenCoords(int x1, int y1, int x2, int y2){

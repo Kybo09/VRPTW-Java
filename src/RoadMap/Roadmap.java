@@ -58,7 +58,7 @@ public class Roadmap implements Cloneable {
             if(st.contains("DATA_DEPOTS")){
                 st = br.readLine();
                 String[] depotData = st.split(" ");
-                this.depot = new Depot(depotData[0], Integer.parseInt(depotData[1]), Integer.parseInt(depotData[2]), Integer.parseInt(depotData[3]), Integer.parseInt(depotData[4]));
+                this.depot = new Depot(depotData[0], Integer.parseInt(depotData[1]), Integer.parseInt(depotData[2]), Integer.parseInt(depotData[3]), Integer.parseInt(depotData[4]), 0);
             }
             if(st.contains("DATA_CLIENTS")){
                 st = br.readLine();
@@ -96,26 +96,23 @@ public class Roadmap implements Cloneable {
     public boolean isRoadmapValid(){
         int nbClientsVisited = 0;
         for (Road road : this.roads) {
-            int distance = 0;
+            double uniteTemps = 0;
 
             for(int i = 0; i < road.getNodesList().size() - 1; i++){
                 if(road.getNodesList().get(i) instanceof Client){
                     nbClientsVisited++;
                 }
-                distance += getDistanceBetweenCoords(road.getNodesList().get(i).getX(), road.getNodesList().get(i).getY(), road.getNodesList().get(i + 1).getX(), road.getNodesList().get(i + 1).getY());
-                if(i != road.getNodesList().size()-2){
-                    if(distance > road.getNodesList().get(i+1).getDueTime()){
-                        System.out.println(i + "/" + road.getNodesList().size() + " Distance = " + distance + "| Due time = " + road.getNodesList().get(i+1).getDueTime());
-                        return false;
-                    }
-                    Client client = (Client) road.getNodesList().get(i+1);
-                    if(distance < client.getReadyTime()){
-                        distance = client.getReadyTime();
-                    }
-                    distance += client.getService();
+                // Vérifier si l'unité de temps ne dépasse pas le dueTime du prochain client
+                uniteTemps += getDistanceBetweenCoords(road.getNodesList().get(i).getX(), road.getNodesList().get(i).getY(), road.getNodesList().get(i + 1).getX(), road.getNodesList().get(i + 1).getY());
+                if(road.getNodesList().get(i +1).getDueTime() < uniteTemps){
+                    return false;
                 }
+                if(uniteTemps < road.getNodesList().get(i+1).getReadyTime()){
+                    uniteTemps = road.getNodesList().get(i+1).getReadyTime();
+                }
+                uniteTemps += road.getNodesList().get(i+1).getService();
             }
-            if(road.calcDistance() > this.depot.getDueTime()){
+            if(road.calcUniteTemps() > this.depot.getDueTime()){
                 return false;
             }
             if(road.calcQuantity() > this.maxQuantity){
@@ -146,6 +143,16 @@ public class Roadmap implements Cloneable {
         clone.depot = this.depot;
         clone.maxQuantity = this.maxQuantity;
         return clone;
+    }
+
+    public int getRoadNumber(){
+        int roadNumber = 0;
+        for(Road r : roads){
+            if(r.getNodesList().size() > 2){
+                roadNumber++;
+            }
+        }
+        return roadNumber;
     }
 
 }

@@ -7,12 +7,15 @@ public abstract class  Node {
     private int readyTime;
     private int dueTime;
 
-    public Node(String idName, int x, int y, int readyTime, int dueTime) {
+    private int service;
+
+    public Node(String idName, int x, int y, int readyTime, int dueTime, int service) {
         this.idName = idName;
         this.x = x;
         this.y = y;
         this.readyTime = readyTime;
         this.dueTime = dueTime;
+        this.service = service;
     }
 
     public String getIdName() {
@@ -33,5 +36,9 @@ public abstract class  Node {
 
     public int getDueTime() {
         return dueTime;
+    }
+
+    public int getService() {
+        return service;
     }
 }

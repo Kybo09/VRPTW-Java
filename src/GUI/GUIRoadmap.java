@@ -86,12 +86,11 @@ public class GUIRoadmap extends Application {
         hBox.setPadding(new Insets(10, 20, 10, 20));
         hBox.setStyle("-fx-background-color: #19191a;");
 
-
         Label infoLabel2 = new Label("Distance Totale : " + Math.round(roadmap.getDistance()));
         infoLabel2.setStyle("-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
         hBox.getChildren().add(infoLabel2);
 
-        Label infoLabel3 = new Label("Nombre de routes : " + roadmap.getRoads().size());
+        Label infoLabel3 = new Label("Nombre de routes : " + roadmap.getRoadNumber());
         infoLabel3.setStyle("-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center;");
         hBox.getChildren().add(infoLabel3);
 
@@ -243,7 +242,8 @@ public class GUIRoadmap extends Application {
 
         System.out.println(roadmap.isRoadmapValid());
 
-        System.out.println("Nombre de routes : " + roadmap.getRoads().size());
+
+        System.out.println("Nombre de routes : " + roadmap.getRoadNumber());
         launch();
     }
 

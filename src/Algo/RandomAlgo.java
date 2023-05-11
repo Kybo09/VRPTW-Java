@@ -24,14 +24,16 @@ public class RandomAlgo {
             road.addNode(this.roadmap.getDepot());
             int i = 0;
             while(true){
+                // Sélectionner au hasard le premier Client qui peut être ajouté à la route
                 Collections.shuffle(this.roadmap.getClients());
                 Client client = null;
                 for(Client c : this.getRoadmap().getClients()){
-                    if(!this.roadmap.visited.get(c) && distance <= c.getDueTime()){
+                    if(!this.roadmap.visited.get(c) && (distance + this.roadmap.getDistanceBetweenCoords(road.getLastNode().getX(), road.getLastNode().getY(), c.getX(), c.getY())) <= c.getDueTime()){
                         client = c;
                         break;
                     }
                 }
+
                 if(client == null){
                     break;
                 }

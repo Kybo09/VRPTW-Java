@@ -13,7 +13,7 @@ public class SandBox {
         Client c3 = new Client("c3", 1, 1, 1, 1, 1, 1);
         Client c4 = new Client("c4", 1, 1, 1, 1, 1, 1);
         Client c5 = new Client("c5", 1, 1, 1, 1, 1, 1);
-        Depot depot = new Depot("d1", 1, 1, 1, 1);
+        Depot depot = new Depot("d1", 1, 1, 1, 1, 0);
 
 
         LinkedList<Client> clients = new LinkedList<>();
